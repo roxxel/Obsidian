@@ -149,7 +149,7 @@ namespace Obsidian.WorldData.Generators.Overworld
                         bool caveAir = noiseGen.Cave(bx + (chunk.X * 16), by, bz + (chunk.Z * 16));
                         if (caveAir)
                         {
-                            if (debug) { b = Registry.GetBlock(Materials.LightGrayStainedGlass); }
+                            if (debug) { b = Registry.GetBlock(Materials.GrayStainedGlass); }
                             chunk.SetBlock(bx, by, bz, b);
                         }
                     }

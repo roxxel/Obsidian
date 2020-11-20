@@ -6,8 +6,8 @@ namespace Obsidian.WorldData.Generators.Overworld
 {
     public class OverworldNoise
     {
-        private Simplex cavePerlin;
-        private Multiply coalNoise;
+        private Module cavePerlin;
+        private Module oreNoise;
 
         private Module BiomeNoise;
         private Module BiomeHumidity;
@@ -26,15 +26,25 @@ namespace Obsidian.WorldData.Generators.Overworld
             generator = new OverworldTerrainGenerator(generatorSettings);
             generatorModule = generator.CreateModule();
 
-            cavePerlin = new Simplex
+            cavePerlin = new Multiply()
             {
-                Frequency = 1.14,
-                Lacunarity = 2.0,
-                OctaveCount = 2,
-                Persistence = 1.53
+                Source0 = new Perlin
+                {
+                    Frequency = 3.14,
+                    Lacunarity = 2.314,
+                    OctaveCount = 2,
+                    Quality = NoiseQuality.Fast
+                },
+                Source1 = new Simplex
+                {
+                    Frequency = 1.14,
+                    Lacunarity = 2.0,
+                    OctaveCount = 2,
+                    Persistence = 1.53
+                }
             };
 
-            coalNoise = new Multiply
+            oreNoise = new Add
             {
                 Source0 = new Checkerboard(),
                 Source1 = new Perlin
@@ -148,14 +158,31 @@ namespace Obsidian.WorldData.Generators.Overworld
         public bool Cave(float x, float y, float z)
         {
             var value = cavePerlin.GetValue(x * generatorSettings.CaveHorizStretch, y * generatorSettings.CaveVertStretch, z * generatorSettings.CaveHorizStretch);
-            return value < generatorSettings.CaveFillPercent + 0.1 && value > -0.1;
+            return !(value < generatorSettings.CaveFillPercent + 0.1 && value > -0.1);
         }
 
         public bool Coal(float x, float y, float z)
         {
-            var value = coalNoise.GetValue(x / 18, y / 6, z / 18);
+            var value = oreNoise.GetValue(x / 18, y / 6, z / 18);
             return value < 0.05 && value > 0;
         }
+
+        public bool Iron(float x, float y, float z)
+        {
+            var value = oreNoise.GetValue(x / 18, (y/6) +1, z / 18);
+            return value < 0.05 && value > 0;
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         public bool isRiver(float x, float z)
         {
@@ -220,6 +247,6 @@ namespace Obsidian.WorldData.Generators.Overworld
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        public double Decoration(double x, double y, double z) => coalNoise.GetValue(x, y + 5, z);
+        public double Decoration(double x, double y, double z) => oreNoise.GetValue(x, y + 5, z);
     }
 }
