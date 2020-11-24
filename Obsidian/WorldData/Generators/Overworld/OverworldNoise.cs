@@ -26,32 +26,28 @@ namespace Obsidian.WorldData.Generators.Overworld
             generator = new OverworldTerrainGenerator(generatorSettings);
             generatorModule = generator.CreateModule();
 
-            cavePerlin = new Multiply()
+            cavePerlin = new Simplex
             {
-                Source0 = new Perlin
-                {
-                    Frequency = 3.14,
-                    Lacunarity = 2.314,
-                    OctaveCount = 2,
-                    Quality = NoiseQuality.Fast
-                },
-                Source1 = new Simplex
-                {
-                    Frequency = 1.14,
-                    Lacunarity = 2.0,
-                    OctaveCount = 2,
-                    Persistence = 1.53
-                }
+                Frequency = 13.37,
+                OctaveCount = 1,
             };
 
-            oreNoise = new Add
+            oreNoise = new Multiply
             {
-                Source0 = new Checkerboard(),
+                Source0 = new Billow()
+                {
+                    Seed = generatorSettings.Seed + 101,
+                    Frequency = 13.37,
+                    Lacunarity = generatorSettings.ContinentLacunarity,
+                    OctaveCount = 2,
+                    Quality = NoiseQuality.Fast,
+                },
                 Source1 = new Perlin
                 {
                     Frequency = 1.14,
                     Lacunarity = 2.222,
-                    Seed = generatorSettings.Seed
+                    OctaveCount = 2,
+                    Seed = generatorSettings.Seed+102
                 }
             };
 
@@ -164,16 +160,26 @@ namespace Obsidian.WorldData.Generators.Overworld
         public bool Coal(float x, float y, float z)
         {
             var value = oreNoise.GetValue(x / 18, y / 6, z / 18);
-            return value < 0.05 && value > 0;
+            return value < 0.55 && value > 0.5;
         }
 
         public bool Iron(float x, float y, float z)
         {
-            var value = oreNoise.GetValue(x / 18, (y/6) +1, z / 18);
-            return value < 0.05 && value > 0;
+            var value = oreNoise.GetValue(x / 25, (y / 20) + 100, z / 25);
+            return value < 0.65 && value > 0.6;
         }
 
+        public bool Redstone(float x, float y, float z)
+        {
+            var value = oreNoise.GetValue(x / 18, (y / 18) + 300, z / 18);
+            return value < 0.95 && value > 0.8;
+        }
 
+        public bool Diamond(float x, float y, float z)
+        {
+            var value = oreNoise.GetValue(x, (y) + 900, z);
+            return value > 0.2;
+        }
 
 
 

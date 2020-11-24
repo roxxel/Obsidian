@@ -85,6 +85,9 @@ namespace Obsidian.WorldData
                 Math.Abs(playerChunkZ - chunk2.Item2) ? -1 : 1;
             });
 
+            // for performance reasons, send no more than 5 at a time.
+            clientNeededChunks = clientNeededChunks.Take(10).ToList();
+
             clientNeededChunks.ForEach(async chunkLoc =>
             {
                 var chunk = this.GetChunk(chunkLoc.Item1, chunkLoc.Item2);

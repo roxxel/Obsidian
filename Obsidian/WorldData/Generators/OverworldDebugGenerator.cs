@@ -127,18 +127,26 @@ namespace Obsidian.WorldData.Generators
                     var worldZ = (chunk.Z * 16) + bz;
                     var rockY = (int)rockHeighmap[bx, bz];
 
-                    for (int by = 24; by < rockY; by++)
+                    for (int by = 3; by < rockY; by++)
                     {
-                        bool isCoal = noiseGen.Coal(worldX, by, worldZ);
-                        if (isCoal)
+                        if (by > 20 && noiseGen.Coal(worldX, by, worldZ))
                         {
                             chunk.SetBlock(bx, by, bz, Registry.GetBlock(Materials.CoalOre));
                         }
 
-                        bool isIron = noiseGen.Iron(worldX, by, worldZ);
-                        if (isIron)
+                        if (by > 10 && by < 45 && noiseGen.Iron(worldX, by, worldZ))
                         {
                             chunk.SetBlock(bx, by, bz, Registry.GetBlock(Materials.IronOre));
+                        }
+
+                        if (by > 1 && by < 24 && noiseGen.Redstone(worldX, by, worldZ))
+                        {
+                            chunk.SetBlock(bx, by, bz, Registry.GetBlock(Materials.RedstoneOre));
+                        }
+
+                        if (by > 3 && by < 16 && noiseGen.Redstone(worldX, by, worldZ))
+                        {
+                            chunk.SetBlock(bx, by, bz, Registry.GetBlock(Materials.DiamondOre));
                         }
                     }
                 }
