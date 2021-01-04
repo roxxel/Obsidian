@@ -10,6 +10,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Obsidian.Util.Registry.Enums;
 
 namespace Obsidian.Util.Extensions
 {
@@ -18,6 +19,28 @@ namespace Obsidian.Util.Extensions
         public static readonly Regex pattern = new Regex(@"[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+");
 
         public static bool IsAir(this ItemStack item) => item == null || item.Type == Material.Air;
+
+        public static Direction Opposite(this Direction direction)
+        {
+            return direction switch
+            {
+                Direction.North => Direction.South,
+                Direction.South => Direction.North,
+                Direction.East => Direction.West,
+                Direction.West => Direction.East
+            };
+        }
+
+        public static BlockFace ToBlockFace(this Direction direction)
+        {
+            return direction switch
+            {
+                Direction.East => BlockFace.East,
+                Direction.North => BlockFace.North,
+                Direction.South => BlockFace.South,
+                Direction.West => BlockFace.West
+            };
+        }
 
         /// <summary>
         /// Gets the new slot value from varying inventory sizes and transforms it to a local inventory slot value

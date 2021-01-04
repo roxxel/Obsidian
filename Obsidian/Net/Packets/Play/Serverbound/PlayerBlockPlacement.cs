@@ -4,6 +4,7 @@ using Obsidian.Entities;
 using Obsidian.Events.EventArgs;
 using Obsidian.Net.Packets.Play.Clientbound;
 using Obsidian.Serialization.Attributes;
+using Obsidian.Util.Extensions;
 using Obsidian.Util.Registry;
 using System;
 using System.Threading.Tasks;
@@ -61,6 +62,21 @@ namespace Obsidian.Net.Packets.Play.Serverbound
             var position = this.Position;
 
             var interactedBlock = server.World.GetBlock(position);
+
+            if (currentItem.Type == Material.FlintAndSteel && interactedBlock.Is(Material.Furnace))
+            {
+                var furnace = (Furnace)interactedBlock;
+
+                float cursorHorizontal = (furnace.Face == Util.Registry.Enums.Direction.North || furnace.Face == Util.Registry.Enums.Direction.South) ? CursorX : CursorZ;
+                if (furnace.Face.ToBlockFace() == Face && CursorY <= (5f / 16f) && cursorHorizontal >= (3f / 16f) && cursorHorizontal <= (13f / 16f))
+                {
+                    furnace.Lit = true;
+                    player.client.SendPacket(new BlockChange(Position, furnace.StateId));
+                }
+            }
+
+            if (block.IsAir)
+                return;
 
             if (interactedBlock.IsInteractable && !player.Sneaking)
             {
@@ -364,6 +380,31 @@ namespace Obsidian.Net.Packets.Play.Serverbound
 
             //TODO calculate the block state
             server.World.SetBlock(position, block);
+
+            if (block.Is(Material.Furnace))
+            {
+                var placePosition = Position + new PositionF(CursorX, CursorY, CursorZ);
+                var lookingVector = placePosition - player.Position;
+                float angle = (MathF.Atan2(lookingVector.Z, lookingVector.X) * 180f / MathF.PI);
+                int dirAngle = (int)angle - 45;
+                if (dirAngle < 0)
+                    dirAngle += 360;
+                dirAngle %= 360;
+                dirAngle /= 90;
+                dirAngle = dirAngle switch
+                {
+                    2 => 0,
+                    0 => 1,
+                    1 => 2,
+                    _ => dirAngle
+                };
+                var direction = (Util.Registry.Enums.Direction)(dirAngle);
+                await player.SendMessageAsync(IChatMessage.Simple($"{angle} -> {dirAngle} -> {direction}"));
+                var furnace = new Furnace(face: direction.Opposite(), lit: false);
+                player.client.SendPacket(new BlockChange(position, furnace.StateId));
+
+                server.World.SetBlock(position, furnace);
+            }
 
             await server.BroadcastBlockPlacementAsync(player, block, position);
         }

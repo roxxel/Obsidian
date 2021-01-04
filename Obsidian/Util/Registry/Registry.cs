@@ -410,7 +410,7 @@ namespace Obsidian.Util.Registry
             DeclareCommandsPacket.AddNode(node);
         }
 
-        public static Block GetBlock(Material material) => new Block(material);
+        public static Block GetBlock(Material material) => (int)material < 763 ? new Block(material) : Block.Air;
 
         public static Block GetBlock(int id) => new Block(id);
 
