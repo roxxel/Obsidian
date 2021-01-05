@@ -68,10 +68,25 @@ namespace Obsidian.Net.Packets.Play.Serverbound
                 var furnace = (Furnace)interactedBlock;
 
                 float cursorHorizontal = (furnace.Face == Util.Registry.Enums.Direction.North || furnace.Face == Util.Registry.Enums.Direction.South) ? CursorX : CursorZ;
-                if (furnace.Face.ToBlockFace() == Face && CursorY <= (5f / 16f) && cursorHorizontal >= (3f / 16f) && cursorHorizontal <= (13f / 16f))
+                PositionF cursorHorizontalOther = (furnace.Face == Util.Registry.Enums.Direction.North || furnace.Face == Util.Registry.Enums.Direction.South) ?
+                    new PositionF(1f / 16f, 0f, 0f) :
+                    new PositionF(0f, 0f, 1f / 16f);
+
+                if (!furnace.Lit && furnace.Face.ToBlockFace() == Face && CursorY <= (5f / 16f) && cursorHorizontal >= (3f / 16f) && cursorHorizontal <= (13f / 16f))
                 {
                     furnace.Lit = true;
+                    server.World.SetBlock(position, furnace);
                     player.client.SendPacket(new BlockChange(Position, furnace.StateId));
+                    player.client.SendPacket(new Particle
+                    {
+                        Type = ParticleType.Flame,
+                        Position = Position + new PositionF(CursorX, 6f / 32f, CursorZ),
+                        OffsetX = cursorHorizontalOther.X * 5f,
+                        OffsetY = 3f / 16f,
+                        OffsetZ = cursorHorizontalOther.Z * 5f,
+                        ParticleCount = 30,
+                        Data = ParticleData.None
+                    });
                 }
             }
 
