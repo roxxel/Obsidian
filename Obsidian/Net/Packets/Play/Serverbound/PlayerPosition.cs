@@ -38,6 +38,16 @@ namespace Obsidian.Net.Packets.Play.Serverbound
         {
             await player.UpdateAsync(server, this.Position, this.OnGround);
             await player.World.UpdateClientChunksAsync(player.client);
+
+            player.client.SendPacket(new Clientbound.Particle
+            {
+                Type = ParticleType.Y,
+                Position = player.Position - (player.LastPosition - player.Position) * 2f,
+                OffsetX = 0.5f,
+                OffsetZ = 0.5f,
+                OffsetY = 1f,
+                ParticleCount = 5
+            });
         }
     }
 }

@@ -87,11 +87,18 @@ namespace Obsidian.Net.Packets.Play.Serverbound
                         ParticleCount = 30,
                         Data = ParticleData.None
                     });
+                    player.client.SendPacket(new Particle
+                    {
+                        Type = ParticleType.Heart,
+                        Position = Position + new PositionF(CursorX, 10f / 16f, CursorZ),
+                        OffsetX = 0.2f,
+                        OffsetY = 6f / 16f,
+                        OffsetZ = 0.2f,
+                        ParticleCount = 3,
+                        Data = ParticleData.None
+                    });
                 }
             }
-
-            if (block.IsAir)
-                return;
 
             if (interactedBlock.IsInteractable && !player.Sneaking)
             {
@@ -392,6 +399,9 @@ namespace Obsidian.Net.Packets.Play.Serverbound
                 default:
                     break;
             }
+
+            if (block.IsAir)
+                return;
 
             //TODO calculate the block state
             server.World.SetBlock(position, block);

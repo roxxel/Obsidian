@@ -2,6 +2,9 @@
 {
     public enum ParticleType
     {
+        // Missing: BlockDust Dolphin Rain WhiteAsh
+        // Wrong: Bubble2 Bubble3 Dripping/Falling/LangingX Portal2
+        
         AmbientEntityEffect,
         AngryVillager,
         Barrier,
@@ -29,6 +32,8 @@
         Firework,
         Fishing,
         Flame,
+        SoulFireFlame,
+        Soul,
         Flash,
         HappyVillager,
         Composter,
@@ -43,7 +48,7 @@
         Note,
         Poof,
         Portal,
-        Rain,
+        Splash,
         Smoke,
         Sneeze,
         Spit,
@@ -51,18 +56,26 @@
         SweepAttack,
         TotemOfUndying,
         Underwater,
-        Splash,
+        DroppingWater,
         Witch,
         BubblePop,
-        CurrentDown,
-        BubbleColumnUp,
-        Nautilus,
-        Dolphin,
-        CampfireCosySmoke,
+        Bubble2,
+        Bubble3,
+        Nautilius,
+        Landingwater,
         CampfireSignalSmoke,
+        CampfireCosySmoke,
         DrippingHoney,
-        FallingHoney,
+        FallingNectar,
         LandingHoney,
-        FallingNectar
+        FallingHoney,
+        WarpedSpore,
+        CrimsonSpore,
+        SomeOtherSpore,
+        DrippingObsidianTear,
+        FallingObsidianTear,
+        LandingObsidianTear,
+        Portal2,
+        Ash
     }
 }
