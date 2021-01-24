@@ -50,7 +50,7 @@ namespace Obsidian.Net
         private int dataLength;
 
         /// <summary>
-        /// Steam underlying buffer.
+        /// This stream's underlying buffer.
         /// </summary>
         private byte[] _buffer;
 
@@ -58,7 +58,7 @@ namespace Obsidian.Net
         private const int maxVarLongSize = 10;
 
         /// <summary>
-        /// Creates new instance of <see cref="NetWriteStream"/> with specified minimum size of underlying buffer.
+        /// Creates a new instance of <see cref="NetWriteStream"/> with specified minimum size of underlying buffer.
         /// </summary>
         /// <param name="minBufferSize">Minimal length of underlying buffer.</param>
         public NetWriteStream(int minBufferSize)
