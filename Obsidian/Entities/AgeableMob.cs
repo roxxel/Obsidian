@@ -21,5 +21,13 @@ namespace Obsidian.Entities
             stream.WriteEntityMetadataType(15, EntityMetadataType.Boolean);
             stream.WriteBoolean(IsBaby);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(15, EntityMetadataType.Boolean);
+            stream.WriteBoolean(IsBaby);
+        }
     }
 }

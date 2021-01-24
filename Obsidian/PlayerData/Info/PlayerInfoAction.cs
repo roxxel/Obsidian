@@ -11,5 +11,7 @@ namespace Obsidian.PlayerData.Info
         public virtual async Task WriteAsync(MinecraftStream stream) => await stream.WriteUuidAsync(this.Uuid);
 
         public virtual void Write(MinecraftStream stream) => stream.WriteUuid(Uuid);
+
+        public virtual void Write(NetWriteStream stream) => stream.WriteGuid(Uuid);
     }
 }

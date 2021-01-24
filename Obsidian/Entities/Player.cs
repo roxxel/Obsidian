@@ -379,6 +379,35 @@ namespace Obsidian.Entities
             }
         }
 
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(14, EntityMetadataType.Float);
+            stream.WriteFloat(AdditionalHearts);
+
+            stream.WriteEntityMetadataType(15, EntityMetadataType.VarInt);
+            stream.WriteVarInt(Score);
+
+            stream.WriteEntityMetadataType(16, EntityMetadataType.Byte);
+            stream.WriteUnsignedByte((byte)PlayerBitMask);
+
+            stream.WriteEntityMetadataType(17, EntityMetadataType.Byte);
+            stream.WriteUnsignedByte((byte)MainHand);
+
+            if (LeftShoulder is not null)
+            {
+                stream.WriteEntityMetadataType(18, EntityMetadataType.Nbt);
+                stream.WriteVarInt(LeftShoulder);
+            }
+
+            if (RightShoulder is not null)
+            {
+                stream.WriteEntityMetadataType(19, EntityMetadataType.Nbt);
+                stream.WriteVarInt(RightShoulder);
+            }
+        }
+
         public override string ToString() => this.Username;
 
         public async Task SetGamemodeAsync(Gamemode gamemode)

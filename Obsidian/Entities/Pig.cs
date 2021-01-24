@@ -27,5 +27,16 @@ namespace Obsidian.Entities
             stream.WriteEntityMetadataType(17, EntityMetadataType.VarInt);
             stream.WriteVarInt(TotalTimeBoost);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(16, EntityMetadataType.Boolean);
+            stream.WriteBoolean(HasSaddle);
+
+            stream.WriteEntityMetadataType(17, EntityMetadataType.VarInt);
+            stream.WriteVarInt(TotalTimeBoost);
+        }
     }
 }

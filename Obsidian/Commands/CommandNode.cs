@@ -77,6 +77,11 @@ namespace Obsidian.Commands
             dataStream.CopyTo(stream);
         }
 
+        public void CopyTo(NetWriteStream stream)
+        {
+
+        }
+
         public void AddChild(CommandNode child) => this.Children.Add(child);
     }
 }

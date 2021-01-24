@@ -21,6 +21,14 @@ namespace Obsidian.Entities
             stream.WriteEntityMetadataType(18, EntityMetadataType.Boolean);
             stream.WriteBoolean(HasChest);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(18, EntityMetadataType.Boolean);
+            stream.WriteBoolean(HasChest);
+        }
     }
 
     public class Llama : ChestedHorse
@@ -41,6 +49,20 @@ namespace Obsidian.Entities
         }
 
         public override void Write(MinecraftStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(19, EntityMetadataType.VarInt);
+            stream.WriteVarInt(Strength);
+
+            stream.WriteEntityMetadataType(20, EntityMetadataType.VarInt);
+            stream.WriteVarInt(CarpetColor);
+
+            stream.WriteEntityMetadataType(21, EntityMetadataType.VarInt);
+            stream.WriteVarInt(Variant);
+        }
+
+        public override void Write(NetWriteStream stream)
         {
             base.Write(stream);
 

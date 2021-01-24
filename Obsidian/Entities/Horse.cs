@@ -21,5 +21,13 @@ namespace Obsidian.Entities
             stream.WriteEntityMetadataType(18, EntityMetadataType.VarInt);
             stream.WriteVarInt(Variant);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(18, EntityMetadataType.VarInt);
+            stream.WriteVarInt(Variant);
+        }
     }
 }

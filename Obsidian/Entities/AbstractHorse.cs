@@ -32,6 +32,19 @@ namespace Obsidian.Entities
             if (true)
                 stream.WriteUuid(Owner);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(16, EntityMetadataType.Byte);
+            stream.WriteUnsignedByte((byte)HorseMask);
+
+            stream.WriteEntityMetadataType(17, EntityMetadataType.OptUuid);
+            stream.WriteBoolean(true);
+            if (true)
+                stream.WriteGuid(Owner);
+        }
     }
 
     public class ZombieHorse : AbstractHorse { }

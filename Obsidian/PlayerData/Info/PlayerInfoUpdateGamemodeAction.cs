@@ -20,5 +20,12 @@ namespace Obsidian.PlayerData.Info
 
             stream.WriteVarInt(Gamemode);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteVarInt(Gamemode);
+        }
     }
 }

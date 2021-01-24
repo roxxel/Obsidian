@@ -22,6 +22,14 @@ namespace Obsidian.Entities
             stream.WriteEntityMetadataType(14, EntityMetadataType.Byte);
             stream.WriteByte((byte)MobBitMask);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(14, EntityMetadataType.Byte);
+            stream.WriteUnsignedByte((byte)MobBitMask);
+        }
     }
 
     [Flags]

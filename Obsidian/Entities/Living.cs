@@ -66,5 +66,33 @@ namespace Obsidian.Entities
             if (BedBlockPosition != default)
                 stream.WritePositionF(BedBlockPosition);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(7, EntityMetadataType.Byte);
+            stream.WriteUnsignedByte((byte)LivingBitMask);
+
+            stream.WriteEntityMetadataType(8, EntityMetadataType.Float);
+            stream.WriteFloat(Health);
+
+            stream.WriteEntityMetadataType(9, EntityMetadataType.VarInt);
+            stream.WriteVarInt((int)ActiveEffectColor);
+
+            stream.WriteEntityMetadataType(10, EntityMetadataType.Boolean);
+            stream.WriteBoolean(AmbientPotionEffect);
+
+            stream.WriteEntityMetadataType(11, EntityMetadataType.VarInt);
+            stream.WriteVarInt(AbsorbedArrows);
+
+            stream.WriteEntityMetadataType(12, EntityMetadataType.VarInt);
+            stream.WriteVarInt(AbsorbtionAmount);
+
+            stream.WriteEntityMetadataType(13, EntityMetadataType.OptPosition);
+            stream.WriteBoolean(BedBlockPosition != default);
+            if (BedBlockPosition != default)
+                stream.WritePositionF(BedBlockPosition);
+        }
     }
 }

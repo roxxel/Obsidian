@@ -23,5 +23,14 @@ namespace Obsidian.PlayerData.Info
             if (HasDisplayName)
                 stream.WriteString(DisplayName);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteBoolean(HasDisplayName);
+            if (HasDisplayName)
+                stream.WriteString(DisplayName);
+        }
     }
 }
