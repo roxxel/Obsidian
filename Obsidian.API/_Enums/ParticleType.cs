@@ -3,8 +3,8 @@
     public enum ParticleType
     {
         // Missing: BlockDust Dolphin Rain WhiteAsh
-        // Wrong: Bubble2 Bubble3 Dripping/Falling/LangingX Portal2
-        
+        // Wrong: Bubble2 Bubble3 Dripping/Falling/LangingX Portal2 SomeOtherSpore
+
         AmbientEntityEffect,
         AngryVillager,
         Barrier,
