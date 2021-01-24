@@ -40,12 +40,12 @@ namespace Obsidian.Net
         public int Length => dataLength;
 
         /// <summary>
-        /// How many bytes can be written into this stream.
+        /// How many bytes can be written to this stream.
         /// </summary>
         public int Capacity => _buffer.Length;
 
         /// <summary>
-        /// How many bytes of data where written to <see cref="_buffer"/>.
+        /// How many bytes of data were written to <see cref="_buffer"/>.
         /// </summary>
         private int dataLength;
 
