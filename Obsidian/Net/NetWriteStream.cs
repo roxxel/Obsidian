@@ -63,6 +63,9 @@ namespace Obsidian.Net
         /// <param name="minBufferSize">Minimal length of underlying buffer.</param>
         public NetWriteStream(int minBufferSize)
         {
+            if (minBufferSize < 0)
+                throw new ArgumentOutOfRangeException(nameof(minBufferSize));
+            
             dataLength = 0;
             _buffer = ArrayPool<byte>.Shared.Rent(minBufferSize);
         }
@@ -120,7 +123,7 @@ namespace Obsidian.Net
         {
             if (dataLength + additionalNeededCapacity >= _buffer.Length)
             {
-                int newCapacity = _buffer.Length;
+                int newCapacity = Math.Max(_buffer.Length, 128);
                 do
                 {
                     newCapacity *= 2;
