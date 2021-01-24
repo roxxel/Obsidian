@@ -96,7 +96,7 @@ namespace Obsidian.Net
         /// <param name="other">Destination for copied data.</param>
         public void CopyTo(NetWriteStream other)
         {
-            other.Write(_buffer.AsSpan(0, dataLength));
+            other.Write(_buffer, 0, dataLength);
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteByte(sbyte value)
         {
-            EnsureCapacity(1);
+            EnsureCapacity(sizeof(sbyte));
 
             _buffer[dataLength++] = (byte)value;
         }
@@ -190,7 +190,7 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUnsignedByte(byte value)
         {
-            EnsureCapacity(1);
+            EnsureCapacity(sizeof(byte));
 
             _buffer[dataLength++] = value;
         }
@@ -209,7 +209,7 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBoolean(bool value)
         {
-            EnsureCapacity(1);
+            EnsureCapacity(sizeof(bool));
 
             _buffer[dataLength++] = value ? 0x01 : 0x00;
         }
@@ -222,16 +222,16 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUnsignedShort(ushort value)
         {
-            EnsureCapacity(2);
+            EnsureCapacity(sizeof(ushort));
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 2), value);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(ushort)), value);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 2);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(ushort));
             BitConverter.TryWriteBytes(span, value);
             span.Reverse();
 #endif
-            dataLength += 2;
+            dataLength += sizeof(ushort);
         }
 
         /// <summary>
@@ -242,16 +242,16 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteShort(short value)
         {
-            EnsureCapacity(2);
+            EnsureCapacity(sizeof(short));
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 2), value);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(short)), value);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 2);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(short));
             BitConverter.TryWriteBytes(span, value);
             span.Reverse();
 #endif
-            dataLength += 2;
+            dataLength += sizeof(short);
         }
 
         /// <summary>
@@ -262,16 +262,16 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt(int value)
         {
-            EnsureCapacity(4);
+            EnsureCapacity(sizeof(int));
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 4), value);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(int)), value);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 4);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(int));
             BitConverter.TryWriteBytes(span, value);
             span.Reverse();
 #endif
-            dataLength += 4;
+            dataLength += sizeof(int);
         }
 
         /// <summary>
@@ -282,16 +282,16 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteLong(long value)
         {
-            EnsureCapacity(8);
+            EnsureCapacity(sizeof(long));
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 8), value);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(long)), value);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 8);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(long));
             BitConverter.TryWriteBytes(span, value);
             span.Reverse();
 #endif
-            dataLength += 8;
+            dataLength += sizeof(long);
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteFloat(float value)
         {
-            EnsureCapacity(4);
+            EnsureCapacity(sizeof(float));
 
             WriteFloatUnsafe(value);
         }
@@ -311,13 +311,13 @@ namespace Obsidian.Net
         private void WriteFloatUnsafe(float value)
         {
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 4), value);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(float)), value);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 4);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(float));
             BitConverter.TryWriteBytes(span, value);
             span.Reverse();
 #endif
-            dataLength += 4;
+            dataLength += sizeof(float);
         }
 
         /// <summary>
@@ -328,16 +328,16 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteDouble(double value)
         {
-            EnsureCapacity(8);
+            EnsureCapacity(sizeof(double));
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 8), value);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(double)), value);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 8);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(double));
             BitConverter.TryWriteBytes(span, value);
             span.Reverse();
 #endif
-            dataLength += 8;
+            dataLength += sizeof(double);
         }
 
         /// <summary>
@@ -500,26 +500,26 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteAbsolutePosition(Position value)
         {
-            EnsureCapacity(24);
+            EnsureCapacity(sizeof(double) * 3);
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 8), value.X);
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + 8, 8), value.Y);
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + 16, 8), value.Z);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(double)), (double)value.X);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + sizeof(double), sizeof(double)), (double)value.Y);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + sizeof(double) * 2, sizeof(double)), (double)value.Z);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 8);
-            BitConverter.TryWriteBytes(span, value.X);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(double));
+            BitConverter.TryWriteBytes(span, (double)value.X);
             span.Reverse();
 
-            span = _buffer.AsSpan(dataLength + 8, 8);
-            BitConverter.TryWriteBytes(span, value.Y);
+            span = _buffer.AsSpan(dataLength + sizeof(double), sizeof(double));
+            BitConverter.TryWriteBytes(span, (double)value.Y);
             span.Reverse();
 
-            span = _buffer.AsSpan(dataLength + 16, 8);
-            BitConverter.TryWriteBytes(span, value.Z);
+            span = _buffer.AsSpan(dataLength + sizeof(double) * 2, sizeof(double));
+            BitConverter.TryWriteBytes(span, (double)value.Z);
             span.Reverse();
 #endif
-            dataLength += 24;
+            dataLength += sizeof(double) * 3;
         }
 
         /// <summary>
@@ -545,26 +545,26 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteAbsolutePositionF(PositionF value)
         {
-            EnsureCapacity(24);
+            EnsureCapacity(sizeof(double) * 3);
 
 #if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, 8), value.X);
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + 8, 8), value.Y);
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + 16, 8), value.Z);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(double)), (double)value.X);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + sizeof(double), sizeof(double)), (double)value.Y);
+            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength + sizeof(double) * 2, sizeof(double)), (double)value.Z);
 #else
-            Span<byte> span = _buffer.AsSpan(dataLength, 8);
-            BitConverter.TryWriteBytes(span, value.X);
+            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(double));
+            BitConverter.TryWriteBytes(span, (double)value.X);
             span.Reverse();
 
-            span = _buffer.AsSpan(dataLength + 8, 8);
-            BitConverter.TryWriteBytes(span, value.Y);
+            span = _buffer.AsSpan(dataLength + sizeof(double), sizeof(double));
+            BitConverter.TryWriteBytes(span, (double)value.Y);
             span.Reverse();
 
-            span = _buffer.AsSpan(dataLength + 16, 8);
-            BitConverter.TryWriteBytes(span, value.Z);
+            span = _buffer.AsSpan(dataLength + sizeof(double) * 2, sizeof(double));
+            BitConverter.TryWriteBytes(span, (double)value.Z);
             span.Reverse();
 #endif
-            dataLength += 24;
+            dataLength += sizeof(double) * 3;
         }
 
         /// <summary>
@@ -1026,7 +1026,7 @@ namespace Obsidian.Net
         }
         #endregion
 
-        private class WriteStream : Stream
+        private sealed class WriteStream : Stream
         {
             private NetWriteStream stream;
 
@@ -1080,6 +1080,16 @@ namespace Obsidian.Net
             public override void WriteByte(byte value)
             {
                 stream.WriteUnsignedByte(value);
+            }
+
+            public override void CopyTo(Stream destination, int bufferSize)
+            {
+                destination.Write(stream._buffer, 0, bufferSize);
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                stream.Dispose();
             }
         }
 
