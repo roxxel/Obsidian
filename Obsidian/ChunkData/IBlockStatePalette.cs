@@ -9,7 +9,7 @@ namespace Obsidian.ChunkData
         int GetIdFromState(Block blockState);
         Block GetStateFromIndex(int index);
         Task WriteToAsync(MinecraftStream stream);
-
+        void WriteTo(NetWriteStream stream);
         Task ReadFromAsync(MinecraftStream stream);
     }
 

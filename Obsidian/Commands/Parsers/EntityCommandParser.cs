@@ -23,6 +23,13 @@ namespace Obsidian.Commands.Parsers
 
             stream.WriteByte((sbyte)this.Mask);
         }
+
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteByte((sbyte)Mask);
+        }
     }
 
     public enum EntityCommadBitMask : sbyte

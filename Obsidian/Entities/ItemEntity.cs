@@ -29,6 +29,17 @@ namespace Obsidian.Entities
             });
         }
 
+        public override void Write(NetWriteStream stream)
+        {
+            base.Write(stream);
+
+            stream.WriteEntityMetadataType(7, EntityMetadataType.Slot);
+            stream.WriteItemStack(new ItemStack(Registry.GetItem(Id).Type, Count, ItemMeta)
+            {
+                Present = true
+            });
+        }
+
         public override async Task TickAsync()
         {
             await base.TickAsync();

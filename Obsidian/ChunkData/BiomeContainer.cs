@@ -41,5 +41,15 @@ namespace Obsidian.ChunkData
             foreach (var biome in Biomes)
                 stream.WriteVarInt(biome);
         }
+
+        public void WriteTo(NetWriteStream stream)
+        {
+            stream.WriteVarInt(1024);
+
+            for (int i = 0; i < Biomes.Count; i++)
+            {
+                stream.WriteVarInt(Biomes[i]);
+            }
+        }
     }
 }

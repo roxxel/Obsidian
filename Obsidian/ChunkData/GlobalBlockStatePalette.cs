@@ -14,6 +14,8 @@ namespace Obsidian.ChunkData
 
         public Task WriteToAsync(MinecraftStream stream) => Task.CompletedTask;
 
+        public void WriteTo(NetWriteStream stream) { }
+
         public Task ReadFromAsync(MinecraftStream stream) => Task.CompletedTask;
     }
 }

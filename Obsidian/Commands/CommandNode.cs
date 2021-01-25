@@ -79,7 +79,23 @@ namespace Obsidian.Commands
 
         public void CopyTo(NetWriteStream stream)
         {
+            stream.WriteByte((sbyte)Type);
+            stream.WriteVarInt(Children.Count);
 
+            foreach (var child in Children)
+            {
+                stream.WriteVarInt(child.Index);
+            }
+
+            if (Type.HasFlag(CommandNodeType.Literal) || Type.HasFlag(CommandNodeType.Argument))
+            {
+                stream.WriteString(Name);
+            }
+
+            if (Type.HasFlag(CommandNodeType.Argument))
+            {
+                Parser.Write(stream);
+            }
         }
 
         public void AddChild(CommandNode child) => this.Children.Add(child);
