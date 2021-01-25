@@ -71,23 +71,36 @@ namespace Obsidian.Net
         }
 
         /// <summary>
-        /// Sends buffered data to the client.
+        /// Sends buffered data asynchronously to the client.
         /// </summary>
-        /// <returns>A task that completes with number of bytes sent to the client if the operation was successful.</returns>
+        /// <param name="socket">Destination socket.</param>
+        /// <returns>Number of bytes sent to the client if the operation was successful.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ValueTask<int> FlushAsync(Client client)
+        public int Flush(Socket socket)
         {
-            return client.tcp.Client.SendAsync(_buffer.AsMemory(0, dataLength), SocketFlags.None);
+            return socket.Send(_buffer, 0, dataLength, SocketFlags.None);
         }
 
         /// <summary>
-        /// Sends buffered data to the client.
+        /// Sends buffered data asynchronously to the client.
         /// </summary>
+        /// /// <param name="socket">Destination socket.</param>
         /// <returns>A task that completes with number of bytes sent to the client if the operation was successful.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ValueTask<int> FlushAsync(Client client, CancellationToken cancellationToken)
+        public ValueTask<int> FlushAsync(Socket socket)
         {
-            return client.tcp.Client.SendAsync(_buffer.AsMemory(0, dataLength), SocketFlags.None, cancellationToken);
+            return socket.SendAsync(_buffer.AsMemory(0, dataLength), SocketFlags.None);
+        }
+
+        /// <summary>
+        /// Sends buffered data asynchronously to the client.
+        /// </summary>
+        /// /// <param name="socket">Destination socket.</param>
+        /// <returns>A task that completes with number of bytes sent to the client if the operation was successful.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ValueTask<int> FlushAsync(Socket socket, CancellationToken cancellationToken)
+        {
+            return socket.SendAsync(_buffer.AsMemory(0, dataLength), SocketFlags.None, cancellationToken);
         }
 
         /// <summary>

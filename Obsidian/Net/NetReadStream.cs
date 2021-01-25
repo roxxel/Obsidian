@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +21,12 @@ namespace Obsidian.Net
     [DebuggerDisplay("{ToString(),nq}")]
     public struct NetReadStream : IDisposable
     {
+        public int Length => _buffer.Length;
+
+        public int Position => dataLength;
+
+        public int DataLeft => _buffer.Length - dataLength;
+        
         /// <summary>
         /// How many bytes of data were read from the <see cref="_buffer"/>.
         /// </summary>
@@ -43,13 +48,12 @@ namespace Obsidian.Net
             };
         }
 
-        public static async ValueTask<NetReadStream> FillAsync(Client client)
+        public static async ValueTask<NetReadStream> FillAsync(Socket socket)
         {
-            if (client is null)
-                throw new ArgumentNullException(nameof(client));
+            if (socket is null)
+                throw new ArgumentNullException(nameof(socket));
             
             var stream = new NetReadStream();
-            var socket = client.tcp.Client;
 
             int length = ReadLength(socket);
             stream._buffer = ArrayPool<byte>.Shared.Rent(length);
