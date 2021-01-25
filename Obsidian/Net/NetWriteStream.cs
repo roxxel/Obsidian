@@ -96,7 +96,8 @@ namespace Obsidian.Net
         /// <param name="other">Destination for copied data.</param>
         public void CopyTo(NetWriteStream other)
         {
-            other.Write(_buffer, 0, dataLength);
+            other.EnsureCapacity(_buffer.Length);
+            Buffer.BlockCopy(_buffer, 0, other._buffer, other.dataLength, _buffer.Length);
         }
 
         /// <summary>
@@ -131,7 +132,7 @@ namespace Obsidian.Net
                 while (dataLength + additionalNeededCapacity >= newCapacity);
 
                 var temp = ArrayPool<byte>.Shared.Rent(newCapacity);
-                Buffer.BlockCopy(_buffer, srcOffset: 0, temp, dstOffset: 0, dataLength);
+                Buffer.BlockCopy(_buffer, 0, temp, 0, dataLength);
                 ArrayPool<byte>.Shared.Return(_buffer);
                 _buffer = temp;
             }
@@ -224,12 +225,9 @@ namespace Obsidian.Net
         {
             EnsureCapacity(sizeof(ushort));
 
-#if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(ushort)), value);
-#else
-            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(ushort));
-            BitConverter.TryWriteBytes(span, value);
-            span.Reverse();
+            Unsafe.WriteUnaligned(ref _buffer[dataLength], value);
+#if !BIGENDIAN
+            _buffer.Reverse(dataLength, sizeof(ushort));
 #endif
             dataLength += sizeof(ushort);
         }
@@ -244,12 +242,9 @@ namespace Obsidian.Net
         {
             EnsureCapacity(sizeof(short));
 
-#if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(short)), value);
-#else
-            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(short));
-            BitConverter.TryWriteBytes(span, value);
-            span.Reverse();
+            Unsafe.WriteUnaligned(ref _buffer[dataLength], value);
+#if !BIGENDIAN
+            _buffer.Reverse(dataLength, sizeof(short));
 #endif
             dataLength += sizeof(short);
         }
@@ -264,12 +259,9 @@ namespace Obsidian.Net
         {
             EnsureCapacity(sizeof(int));
 
-#if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(int)), value);
-#else
-            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(int));
-            BitConverter.TryWriteBytes(span, value);
-            span.Reverse();
+            Unsafe.WriteUnaligned(ref _buffer[dataLength], value);
+#if !BIGENDIAN
+            _buffer.Reverse(dataLength, sizeof(int));
 #endif
             dataLength += sizeof(int);
         }
@@ -284,12 +276,9 @@ namespace Obsidian.Net
         {
             EnsureCapacity(sizeof(long));
 
-#if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(long)), value);
-#else
-            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(long));
-            BitConverter.TryWriteBytes(span, value);
-            span.Reverse();
+            Unsafe.WriteUnaligned(ref _buffer[dataLength], value);
+#if !BIGENDIAN
+            _buffer.Reverse(dataLength, sizeof(long));
 #endif
             dataLength += sizeof(long);
         }
@@ -310,12 +299,9 @@ namespace Obsidian.Net
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteFloatUnsafe(float value)
         {
-#if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(float)), value);
-#else
-            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(float));
-            BitConverter.TryWriteBytes(span, value);
-            span.Reverse();
+            Unsafe.WriteUnaligned(ref _buffer[dataLength], value);
+#if !BIGENDIAN
+            _buffer.Reverse(dataLength, sizeof(float));
 #endif
             dataLength += sizeof(float);
         }
@@ -330,12 +316,9 @@ namespace Obsidian.Net
         {
             EnsureCapacity(sizeof(double));
 
-#if BIGENDIAN
-            BitConverter.TryWriteBytes(_buffer.AsSpan(dataLength, sizeof(double)), value);
-#else
-            Span<byte> span = _buffer.AsSpan(dataLength, sizeof(double));
-            BitConverter.TryWriteBytes(span, value);
-            span.Reverse();
+            Unsafe.WriteUnaligned(ref _buffer[dataLength], value);
+#if !BIGENDIAN
+            _buffer.Reverse(dataLength, sizeof(double));
 #endif
             dataLength += sizeof(double);
         }
@@ -1129,6 +1112,25 @@ namespace Obsidian.Net
                 destination[13] = _i;
                 destination[14] = _j;
             }
+        }
+    }
+
+    internal static partial class Extensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Reverse(this byte[] array, int index, int count)
+        {
+            ref byte first = ref array[index];
+            ref byte last = ref array[index + count - 1];
+            do
+            {
+                byte temp = first;
+                first = last;
+                last = temp;
+                first = ref Unsafe.Add(ref first, 1);
+                last = ref Unsafe.Add(ref last, -1);
+            }
+            while (Unsafe.IsAddressLessThan(ref first, ref last));
         }
     }
 }

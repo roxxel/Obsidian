@@ -556,8 +556,9 @@ namespace Obsidian.Net
         }
     }
 
-    internal static class Extensions
+    internal static partial class Extensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] Subarray(this byte[] array, int index, int length)
         {
             var subarray = new byte[length];
