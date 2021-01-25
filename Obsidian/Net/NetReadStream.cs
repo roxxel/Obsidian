@@ -14,6 +14,7 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Obsidian.Net
@@ -53,6 +54,21 @@ namespace Obsidian.Net
             int length = ReadLength(socket);
             stream._buffer = ArrayPool<byte>.Shared.Rent(length);
             await socket.ReceiveAsync(stream._buffer, SocketFlags.None);
+
+            return stream;
+        }
+
+        public static async ValueTask<NetReadStream> FillAsync(Client client, CancellationToken cancellationToken)
+        {
+            if (client is null)
+                throw new ArgumentNullException(nameof(client));
+
+            var stream = new NetReadStream();
+            var socket = client.tcp.Client;
+
+            int length = ReadLength(socket);
+            stream._buffer = ArrayPool<byte>.Shared.Rent(length);
+            await socket.ReceiveAsync(stream._buffer, SocketFlags.None, cancellationToken);
 
             return stream;
         }
