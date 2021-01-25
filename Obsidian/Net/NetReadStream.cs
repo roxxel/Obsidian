@@ -132,9 +132,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<ushort>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(ushort));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<ushort>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(ushort));
+            var value = Unsafe.ReadUnaligned<ushort>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(ushort);
             return value;
@@ -147,9 +146,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<short>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(short));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<short>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(short));
+            var value = Unsafe.ReadUnaligned<short>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(short);
             return value;
@@ -162,9 +160,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<int>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(int));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<int>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(int));
+            var value = Unsafe.ReadUnaligned<int>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(int);
             return value;
@@ -177,9 +174,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<long>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(long));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<long>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(long));
+            var value = Unsafe.ReadUnaligned<long>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(long);
             return value;
@@ -192,9 +188,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<ulong>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(ulong));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<ulong>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(ulong));
+            var value = Unsafe.ReadUnaligned<ulong>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(ulong);
             return value;
@@ -207,9 +202,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<float>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(float));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<float>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(float));
+            var value = Unsafe.ReadUnaligned<float>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(float);
             return value;
@@ -222,9 +216,8 @@ namespace Obsidian.Net
 #if BIGENDIAN
             var value = Unsafe.ReadUnaligned<double>(ref _buffer[dataLength]);
 #else
-            var span = _buffer.AsSpan(dataLength, sizeof(double));
-            span.Reverse();
-            var value = Unsafe.ReadUnaligned<double>(ref MemoryMarshal.GetReference(span));
+            _buffer.Reverse(dataLength, sizeof(double));
+            var value = Unsafe.ReadUnaligned<double>(ref _buffer[dataLength]);
 #endif
             dataLength += sizeof(double);
             return value;
