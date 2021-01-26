@@ -18,13 +18,25 @@ using System.Threading.Tasks;
 
 namespace Obsidian.Net
 {
+    /// <summary>
+    /// Read-only buffered stream.
+    /// </summary>
     [DebuggerDisplay("{ToString(),nq}")]
     public struct NetReadStream : IDisposable
     {
+        /// <summary>
+        /// How many bytes of data are buffered by this stream.
+        /// </summary>
         public int Length => _buffer.Length;
 
+        /// <summary>
+        /// Position in the data buffer from which data will be read.
+        /// </summary>
         public int Position => dataLength;
 
+        /// <summary>
+        /// How many bytes of data were not read yet.
+        /// </summary>
         public int DataLeft => _buffer.Length - dataLength;
         
         /// <summary>
@@ -37,6 +49,11 @@ namespace Obsidian.Net
         /// </summary>
         private byte[] _buffer;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="NetReadStream"/> around a buffer.
+        /// </summary>
+        /// <param name="buffer">Data to be read from this stream.</param>
+        /// <returns></returns>
         public static NetReadStream Fill(byte[] buffer)
         {
             if (buffer is null)
@@ -48,6 +65,11 @@ namespace Obsidian.Net
             };
         }
 
+        /// <summary>
+        /// Asynchronously fills stream's buffer with packet data from socket.
+        /// </summary>
+        /// <param name="socket">Socket to be read from.</param>
+        /// <returns>Stream with buffered packet data.</returns>
         public static async ValueTask<NetReadStream> FillAsync(Socket socket)
         {
             if (socket is null)
@@ -62,13 +84,17 @@ namespace Obsidian.Net
             return stream;
         }
 
-        public static async ValueTask<NetReadStream> FillAsync(Client client, CancellationToken cancellationToken)
+        /// <summary>
+        /// Asynchronously fills stream's buffer with packet data from socket.
+        /// </summary>
+        /// <param name="socket">Socket to be read from.</param>
+        /// <returns>Stream with buffered packet data.</returns>
+        public static async ValueTask<NetReadStream> FillAsync(Socket socket, CancellationToken cancellationToken)
         {
-            if (client is null)
-                throw new ArgumentNullException(nameof(client));
+            if (socket is null)
+                throw new ArgumentNullException(nameof(socket));
 
             var stream = new NetReadStream();
-            var socket = client.tcp.Client;
 
             int length = ReadLength(socket);
             stream._buffer = ArrayPool<byte>.Shared.Rent(length);
@@ -87,6 +113,10 @@ namespace Obsidian.Net
             ArrayPool<byte>.Shared.Return(_buffer);
         }
 
+        /// <summary>
+        /// Creates a new read-only <see cref="Stream"/> around this <see cref="NetReadStream"/>.
+        /// </summary>
+        /// <returns>Read-only <see cref="Stream"/> that wraps around <see cref="NetReadStream"/>.</returns>
         public Stream GetStream()
         {
             return new ReadStream(this);
@@ -110,6 +140,13 @@ namespace Obsidian.Net
         }
 
         #region Read Methods
+        /// <summary>
+        /// Reads bytes from this <see cref="NetReadStream"/> to specified location in <see cref="byte"/> buffer.
+        /// </summary>
+        /// <param name="buffer">Destination for bytes.</param>
+        /// <param name="offset">Index of where first byte will be written to.</param>
+        /// <param name="length">How many bytes should be read.</param>
+        /// <returns>How many bytes were read into the <paramref name="buffer"/>.</returns>
         public int Read(byte[] buffer, int offset, int length)
         {
             Buffer.BlockCopy(_buffer, dataLength, buffer, offset, length);
@@ -117,6 +154,11 @@ namespace Obsidian.Net
             return length;
         }
 
+        /// <summary>
+        /// Reads bytes into a <see cref="Span{T}"/> of <see cref="byte"/>s.
+        /// </summary>
+        /// <param name="span">Destination for bytes.</param>
+        /// <returns>How many bytes were read into the <paramref name="span"/>.</returns>
         public int Read(Span<byte> span)
         {
             _buffer.AsSpan(dataLength, span.Length).CopyTo(span);
@@ -124,6 +166,10 @@ namespace Obsidian.Net
             return span.Length;
         }
 
+        /// <summary>
+        /// Reads <see cref="sbyte"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="sbyte"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte ReadByte()
@@ -131,6 +177,10 @@ namespace Obsidian.Net
             return (sbyte)_buffer[dataLength++];
         }
 
+        /// <summary>
+        /// Reads <see cref="byte"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="byte"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadUnsignedByte()
@@ -138,6 +188,10 @@ namespace Obsidian.Net
             return _buffer[dataLength++];
         }
 
+        /// <summary>
+        /// Reads <see cref="bool"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="bool"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBoolean()
@@ -145,6 +199,10 @@ namespace Obsidian.Net
             return _buffer[dataLength++] == 0x01;
         }
 
+        /// <summary>
+        /// Reads <see cref="ushort"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="ushort"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadUnsignedShort()
@@ -159,6 +217,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="short"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="short"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short ReadShort()
@@ -173,6 +235,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="int"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="int"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ReadInt()
@@ -187,6 +253,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="long"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="long"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ReadLong()
@@ -201,6 +271,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="ulong"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="ulong"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadUnsignedLong()
@@ -215,6 +289,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="float"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="float"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float ReadFloat()
@@ -229,6 +307,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="double"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="double"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double ReadDouble()
@@ -243,6 +325,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="string"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="string"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadString()
@@ -253,6 +339,10 @@ namespace Obsidian.Net
             return value;
         }
 
+        /// <summary>
+        /// Reads <see cref="int"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="int"/>.</returns>
         [ReadMethod, VarLength]
         public int ReadVarInt()
         {
@@ -271,6 +361,10 @@ namespace Obsidian.Net
             return result;
         }
 
+        /// <summary>
+        /// Reads <see cref="byte"/>[] from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="byte"/>[].</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] ReadUnsignedByteArray()
@@ -280,6 +374,10 @@ namespace Obsidian.Net
             return length != 0 ? _buffer.Subarray(dataLength, length) : Array.Empty<byte>();
         }
 
+        /// <summary>
+        /// Reads <see cref="long"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="long"/>.</returns>
         [ReadMethod, VarLength]
         public long ReadVarLong()
         {
@@ -298,6 +396,10 @@ namespace Obsidian.Net
             return result;
         }
 
+        /// <summary>
+        /// Reads <see cref="API.Position"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="API.Position"/>.</returns>
         [ReadMethod]
         public Position ReadPosition()
         {
@@ -324,6 +426,10 @@ namespace Obsidian.Net
             };
         }
 
+        /// <summary>
+        /// Reads <see cref="API.Position"/> in absolute format from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="API.Position"/>.</returns>
         [ReadMethod, Absolute]
         public Position ReadAbsolutePosition()
         {
@@ -335,6 +441,10 @@ namespace Obsidian.Net
             };
         }
 
+        /// <summary>
+        /// Reads <see cref="PositionF"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="PositionF"/>.</returns>
         [ReadMethod]
         public PositionF ReadPositionF()
         {
@@ -361,6 +471,10 @@ namespace Obsidian.Net
             };
         }
 
+        /// <summary>
+        /// Reads <see cref="PositionF"/> in absolute format from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="PositionF"/>.</returns>
         [ReadMethod, Absolute]
         public PositionF ReadAbsolutePositionF()
         {
@@ -372,6 +486,10 @@ namespace Obsidian.Net
             };
         }
 
+        /// <summary>
+        /// Reads <see cref="SoundPosition"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="SoundPosition"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SoundPosition ReadSoundPosition()
@@ -379,6 +497,10 @@ namespace Obsidian.Net
             return new SoundPosition(ReadInt(), ReadInt(), ReadInt());
         }
 
+        /// <summary>
+        /// Reads <see cref="Angle"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="Angle"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Angle ReadAngle()
@@ -386,6 +508,10 @@ namespace Obsidian.Net
             return new Angle(ReadUnsignedByte());
         }
 
+        /// <summary>
+        /// Reads <see cref="Velocity"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="Velocity"/>.</returns>
         [ReadMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Velocity ReadVelocity()
@@ -393,12 +519,20 @@ namespace Obsidian.Net
             return new Velocity(ReadShort(), ReadShort(), ReadShort());
         }
 
+        /// <summary>
+        /// Reads <see cref="Guid"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="Guid"/>.</returns>
         [ReadMethod]
         public Guid ReadGuid()
         {
             return Guid.Parse(ReadString());
         }
 
+        /// <summary>
+        /// Reads <see cref="ItemStack"/> from this stream.
+        /// </summary>
+        /// <returns>Read value as <see cref="ItemStack"/>.</returns>
         [ReadMethod]
         public ItemStack ReadItemStack()
         {

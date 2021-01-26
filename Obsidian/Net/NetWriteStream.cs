@@ -116,7 +116,7 @@ namespace Obsidian.Net
         /// <summary>
         /// Creates a new write-only <see cref="Stream"/> around this <see cref="NetWriteStream"/>.
         /// </summary>
-        /// <returns>A new write-only <see cref="Stream"/> that wraps around <see cref="NetWriteStream"/>.</returns>
+        /// <returns>Write-only <see cref="Stream"/> that wraps around <see cref="NetWriteStream"/>.</returns>
         public Stream GetStream()
         {
             return new WriteStream(this);
