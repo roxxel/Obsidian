@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Obsidian.API;
-using Obsidian.API._Interfaces;
 using Obsidian.Util.Extensions;
 using System;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ namespace Obsidian.Util
         /// <summary>
         /// Generates a server status from the specified <paramref name="server"/>.
         /// </summary>
-        public ServerStatus(IClientServer server)
+        public ServerStatus(Server server)
         {
             if (server == null)
                 throw new ArgumentNullException(nameof(server));
@@ -91,7 +90,7 @@ namespace Obsidian.Util
         [JsonProperty("sample")]
         public List<object> Sample { get; set; } = new List<object>();
 
-        public ServerPlayers(IClientServer server)
+        public ServerPlayers(Server server)
         {
             var players = server.OnlinePlayers.Values;
 
@@ -134,6 +133,6 @@ namespace Obsidian.Util
         [JsonProperty("text")]
         private string text;
 
-        public ServerDescription(IClientServer server) => this.Text = server.Config.Motd;
+        public ServerDescription(Server server) => this.Text = server.Config.Motd;
     }
 }

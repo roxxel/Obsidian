@@ -3,7 +3,6 @@
 using Microsoft.Extensions.Logging;
 
 using Obsidian.API;
-using Obsidian.API._Interfaces;
 using Obsidian.API.Events;
 using Obsidian.Chat;
 using Obsidian.Entities;
@@ -74,14 +73,14 @@ namespace Obsidian
 
         public ClientState State { get; private set; } = ClientState.Handshaking;
 
-        public IClientServer Server { get; private set; }
+        public Server Server { get; private set; }
         public Player Player { get; private set; }
 
         public ILogger Logger => this.Server.Logger;
 
         public List<(int, int)> LoadedChunks { get; internal set; }
 
-        public Client(TcpClient tcp, Config config, int playerId, IClientServer originServer)
+        public Client(TcpClient tcp, Config config, int playerId, Server originServer)
         {
             this.tcp = tcp;
             this.config = config;
@@ -218,7 +217,7 @@ namespace Obsidian
 
                                     this.Player = new Player(Guid.Parse(user.Id), loginStart.Username, this)
                                     {
-                                        World = this.Server.World as World
+                                        World = this.Server.World
                                     };
 
                                     this.packetCryptography.GenerateKeyPair();
@@ -234,7 +233,7 @@ namespace Obsidian
 
                                 this.Player = new Player(UUIDFactory.CreateUUID(3, 1, $"OfflinePlayer:{username}"), username, this)
                                 {
-                                    World = this.Server.World as World
+                                    World = this.Server.World
                                 };
 
                                 //await this.SetCompression();

@@ -24,17 +24,11 @@ namespace Obsidian.Cloud.ClientService
     /// <summary>
     /// An instance of this class is created for each service instance by the Service Fabric runtime.
     /// </summary>
-    internal sealed class ClientService : StatelessService, IClientServer
+    internal sealed class ClientService : StatelessService
     {
         public Config Config { get; }
         public IConfig Configuration => Config;
         public World World { get; private set; }
-
-        MinecraftEventHandler IClientServer.Events => throw new NotImplementedException();
-
-        World IClientServer.World => throw new NotImplementedException();
-
-        Config IClientServer.Config => throw new NotImplementedException();
 
         ConcurrentDictionary<Guid, Player> OnlinePlayers;
 
