@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Obsidian.API;
+using Obsidian.API;
 using Obsidian.Blocks;
 using Obsidian.Entities;
 using Obsidian.Nbt;
@@ -18,11 +19,11 @@ namespace Obsidian.WorldData
 {
     public class World : IWorld
     {
-        public Level Data { get; internal set; }
+        public ILevel Data { get; internal set; }
 
         public ConcurrentDictionary<Guid, Player> Players { get; private set; } = new();
 
-        public WorldGenerator Generator { get; internal set; }
+        public IWorldGenerator Generator { get; internal set; }
 
         public Server Server { get; }
 
@@ -45,7 +46,7 @@ namespace Obsidian.WorldData
                 Time = 1200,
                 GameType = (int)Gamemode.Survival,
                 GeneratorName = WorldType.Default.ToString()
-            };
+            } as ILevel;
 
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
             this.Server = server;
@@ -261,7 +262,7 @@ namespace Obsidian.WorldData
                 Time = levelcompound["Time"].LongValue,
                 GeneratorName = levelcompound["generatorName"].StringValue,
                 LevelName = levelcompound["LevelName"].StringValue
-            };
+            } as ILevel;
 
             if (!Server.WorldGenerators.TryGetValue(this.Data.GeneratorName, out WorldGenerator value))
             {
@@ -408,13 +409,13 @@ namespace Obsidian.WorldData
                     ChunksToGen.Enqueue((job.x, job.z));
                     return;
                 }
-                Chunk c = Generator.GenerateChunk(job.x, job.z);
+                Chunk c = Generator.GenerateChunk(job.x, job.z) as Chunk;
                 var index = (x: Helpers.Modulo(c.X, Region.cubicRegionSize), z: Helpers.Modulo(c.Z, Region.cubicRegionSize));
                 region.LoadedChunks[index.x, index.z] = c;
             });
         }
 
-        internal void Init(WorldGenerator gen)
+        public void Init(IWorldGenerator gen)
         {
             // Make world directory
             Directory.CreateDirectory(Path.Join(Server.ServerFolderPath, Name));

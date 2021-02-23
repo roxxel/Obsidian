@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Obsidian.API;
+using System.Collections.Generic;
 
 namespace Obsidian.WorldData
 {
-    public abstract class WorldGenerator
+    public abstract class WorldGenerator : IWorldGenerator
     {
         public List<Chunk> Chunks { get; }
 
@@ -14,6 +15,6 @@ namespace Obsidian.WorldData
             this.Id = id;
         }
 
-        public abstract Chunk GenerateChunk(int x, int z);
+        public abstract IChunk GenerateChunk(int x, int z);
     }
 }

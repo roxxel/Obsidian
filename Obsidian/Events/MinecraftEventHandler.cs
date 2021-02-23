@@ -1,11 +1,12 @@
-﻿using Obsidian.API.Events;
+﻿using Obsidian.API._Interfaces;
+using Obsidian.API.Events;
 using Obsidian.Events.EventArgs;
 using System;
 using System.Threading.Tasks;
 
 namespace Obsidian.Events
 {
-    public class MinecraftEventHandler
+    public class MinecraftEventHandler : IMinecraftEventHandler
     {
         private readonly AsyncEvent<PacketReceivedEventArgs> packetReceived;
         private readonly AsyncEvent<QueuePacketEventArgs> queuePacket;
@@ -141,7 +142,7 @@ namespace Obsidian.Events
             return eventArgs;
         }
 
-        internal async Task<IncomingChatMessageEventArgs> InvokeIncomingChatMessageAsync(IncomingChatMessageEventArgs eventArgs)
+        public async Task<IncomingChatMessageEventArgs> InvokeIncomingChatMessageAsync(IncomingChatMessageEventArgs eventArgs)
         {
             await this.incomingChatMessage.InvokeAsync(eventArgs);
 
@@ -169,16 +170,16 @@ namespace Obsidian.Events
         internal Task InvokePacketReceivedAsync(PacketReceivedEventArgs eventArgs) =>
             this.packetReceived.InvokeAsync(eventArgs);
 
-        internal Task InvokePlayerJoinAsync(PlayerJoinEventArgs eventArgs) =>
+        public Task InvokePlayerJoinAsync(PlayerJoinEventArgs eventArgs) =>
             this.playerJoin.InvokeAsync(eventArgs);
 
-        internal Task InvokePlayerLeaveAsync(PlayerLeaveEventArgs eventArgs) =>
+        public Task InvokePlayerLeaveAsync(PlayerLeaveEventArgs eventArgs) =>
             this.playerLeave.InvokeAsync(eventArgs);
 
-        internal Task InvokeServerTickAsync() =>
+        public Task InvokeServerTickAsync() =>
             this.serverTick.InvokeAsync();
 
-        internal async Task<ServerStatusRequestEventArgs> InvokeServerStatusRequest(ServerStatusRequestEventArgs eventargs)
+        public async Task<ServerStatusRequestEventArgs> InvokeServerStatusRequest(ServerStatusRequestEventArgs eventargs)
         {
             await this.serverStatusRequest.InvokeAsync(eventargs);
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Obsidian.API;
+using Obsidian.API._Interfaces;
 using Obsidian.API.Crafting;
 using Obsidian.API.Events;
 using Obsidian.Chat;
@@ -34,7 +35,7 @@ using System.Threading.Tasks;
 
 namespace Obsidian
 {
-    public class Server : IServer
+    public class Server : IServer, IClientServer
     {
         private readonly ConcurrentQueue<QueueChat> chatMessages;
         private readonly ConcurrentQueue<PlayerBlockPlacement> placed;
@@ -51,7 +52,7 @@ namespace Obsidian
         public short TPS { get; private set; }
         public DateTimeOffset StartTime { get; private set; }
 
-        public MinecraftEventHandler Events { get; }
+        public IMinecraftEventHandler Events { get; }
         public PluginManager PluginManager { get; }
 
         public IOperatorList Operators { get; }
@@ -62,7 +63,7 @@ namespace Obsidian
 
         public ConcurrentDictionary<Guid, Player> OnlinePlayers { get; } = new ConcurrentDictionary<Guid, Player>();
 
-        public ConcurrentDictionary<string, World> Worlds { get; private set; } = new ConcurrentDictionary<string, World>();
+        public ConcurrentDictionary<string, IWorld> Worlds { get; private set; } = new ConcurrentDictionary<string, IWorld>();
 
         public Dictionary<string, WorldGenerator> WorldGenerators { get; } = new Dictionary<string, WorldGenerator>();
 
@@ -82,7 +83,7 @@ namespace Obsidian
         public string Version { get; }
         public int Port { get; }
 
-        public World World { get; private set; }
+        public IWorld World { get; private set; }
         public IWorld DefaultWorld => World;
 
         public string ServerFolderPath { get; }
@@ -132,7 +133,7 @@ namespace Obsidian
             Logger.LogDebug("Registering command context type...");
             Logger.LogDebug("Done registering commands.");
 
-            this.Events = new MinecraftEventHandler();
+            this.Events = new MinecraftEventHandler() as IMinecraftEventHandler;
 
             this.Operators = new OperatorList(this);
 
@@ -281,7 +282,7 @@ namespace Obsidian
                 var tcp = await this.tcpListener.AcceptTcpClientAsync();
                 this.Logger.LogDebug($"New connection from client with IP {tcp.Client.RemoteEndPoint}");
 
-                var client = new Client(tcp, this.Config, Math.Max(0, this.clients.Count + this.World.TotalLoadedEntities()), this);
+                var client = new Client(tcp, this.Config, this.clients.Count, this);
                 this.clients.Add(client);
                 client.Disconnected += client => clients.TryRemove(client);
 
