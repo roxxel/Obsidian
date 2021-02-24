@@ -105,7 +105,7 @@ namespace Obsidian
             this.Port = config.Port;
             this.Version = version;
             this.Id = serverId;
-            this.ServerFolderPath = Path.GetFullPath($"Server-{this.Id}");
+            this.ServerFolderPath = Path.Combine(Globals.BasePath, $"Server-{this.Id}");
 
             this.tcpListener = new TcpListener(IPAddress.Any, this.Port);
 

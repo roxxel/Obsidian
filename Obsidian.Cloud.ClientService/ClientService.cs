@@ -14,8 +14,6 @@ using Newtonsoft.Json;
 using Obsidian.API;
 using Obsidian.Concurrency;
 using Obsidian.Entities;
-using Obsidian.Events;
-using Obsidian.Interfaces;
 using Obsidian.Util;
 using Obsidian.WorldData;
 
@@ -26,36 +24,12 @@ namespace Obsidian.Cloud.ClientService
     /// </summary>
     internal sealed class ClientService : StatelessService
     {
-        public Config Config { get; }
-        public IConfig Configuration => Config;
-        public World World { get; private set; }
-
-        ConcurrentDictionary<Guid, Player> OnlinePlayers;
-
-        private readonly ConcurrentHashSet<Client> clients;
-        private readonly TcpListener tcpListener;
+        private static readonly Dictionary<int, Server> Servers = new();
 
         public ClientService(StatelessServiceContext context)
             : base(context)
         {
-            this.clients = new ConcurrentHashSet<Client>();
-            this.OnlinePlayers = new ConcurrentDictionary<Guid, Player>();
-            this.tcpListener = new TcpListener(IPAddress.Any, 25565) { ExclusiveAddressUse = false };
 
-
-            string serverDir = $"Server-69";
-            Directory.CreateDirectory(serverDir);
-            string configPath = Path.Combine(serverDir, "config.json");
-            if (File.Exists(configPath))
-            {
-                Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
-            }
-            else
-            {
-                Config = new Config();
-                File.WriteAllText(configPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"Created new configuration file for Server-69");
-            }
         }
 
         /// <summary>
@@ -80,21 +54,37 @@ namespace Obsidian.Cloud.ClientService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (Config is null) { return; }
-
-            ServiceEventSource.Current.ServiceMessage(this.Context, "Launching Obsidian Server.");
-            this.tcpListener.Start();
-            ServiceEventSource.Current.ServiceMessage(this.Context, "Listening for new clients...");
-
-            while (true)
+            string version = "0.1-DEV";
+            Globals.BasePath = Path.GetTempPath();
+            Directory.CreateDirectory(Globals.BasePath);
+            string globalConfigFile = Path.Combine(Globals.BasePath, "global_config.json");
+            if (File.Exists(globalConfigFile))
             {
-                var tcp = await this.tcpListener.AcceptTcpClientAsync();
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"New connection from client with IP {tcp.Client.RemoteEndPoint}");
-                var client = new Client(tcp, this.Config, this.clients.Count, this); //TODO: clients.Count * ClientServerID
-                this.clients.Add(client);
-                client.Disconnected += client => clients.TryRemove(client);
-                _ = Task.Run(client.StartConnectionAsync);
+                Globals.Config = JsonConvert.DeserializeObject<GlobalConfig>(File.ReadAllText(globalConfigFile));
             }
+            else
+            {
+                Globals.Config = new GlobalConfig();
+                File.WriteAllText(globalConfigFile, JsonConvert.SerializeObject(Globals.Config, Formatting.Indented));
+                Console.WriteLine("Created new global configuration `file");
+            }
+
+            string configPath = Path.Combine(Globals.BasePath, "config.json");
+            Config config;
+            if (File.Exists(configPath))
+            {
+                config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
+            }
+            else
+            {
+                config = new Config();
+                File.WriteAllText(configPath, JsonConvert.SerializeObject(config, Formatting.Indented));
+                Console.WriteLine($"Created new configuration file for Server-0");
+            }
+            var server = new Server(config, version, 0);
+
+            await server.StartServerAsync();
+            
 
         }
     }

@@ -7,6 +7,7 @@ using Obsidian.Util.Converters;
 using Obsidian.Util.Registry.Enums;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 
 namespace Obsidian
@@ -15,6 +16,7 @@ namespace Obsidian
     {
         public static HttpClient HttpClient { get; } = new HttpClient();
         public static Random Random { get; } = new Random();
+        public static string BasePath { get; set; } = Directory.GetCurrentDirectory();
         public static GlobalConfig Config { get; set; }
         public static ILogger PacketLogger { get; set; }
         public static DefaultContractResolver ContractResolver { get; } = new DefaultContractResolver

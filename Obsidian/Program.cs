@@ -74,7 +74,7 @@ namespace Obsidian
 
             for (int i = 0; i < Globals.Config.ServerCount; i++)
             {
-                string serverDir = $"Server-{i}";
+                string serverDir = Path.Combine(Globals.BasePath, $"Server-{i}");
 
                 Directory.CreateDirectory(serverDir);
 

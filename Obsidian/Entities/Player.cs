@@ -243,7 +243,7 @@ namespace Obsidian.Entities
         {
             // Save permissions to JSON file
             var server = (Server)this.Server;
-            var dir = Path.Combine($"Server-{server.Id}", "permissions");
+            var dir = Path.Combine(Globals.BasePath, $"Server-{server.Id}", "permissions");
             var user = server.Config.OnlineMode ? this.Uuid.ToString() : this.Username;
             var file = Path.Combine(dir, $"{user}.json");
 
