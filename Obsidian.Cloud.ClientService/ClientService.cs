@@ -24,12 +24,10 @@ namespace Obsidian.Cloud.ClientService
     /// </summary>
     internal sealed class ClientService : StatelessService
     {
-        private static readonly Dictionary<int, Server> Servers = new();
 
         public ClientService(StatelessServiceContext context)
             : base(context)
         {
-
         }
 
         /// <summary>
@@ -55,9 +53,10 @@ namespace Obsidian.Cloud.ClientService
             cancellationToken.ThrowIfCancellationRequested();
 
             string version = "0.1-DEV";
-            Globals.BasePath = Path.GetTempPath();
+            Globals.BasePath = this.Context.CodePackageActivationContext.WorkDirectory;
             Directory.CreateDirectory(Globals.BasePath);
             string globalConfigFile = Path.Combine(Globals.BasePath, "global_config.json");
+
             if (File.Exists(globalConfigFile))
             {
                 Globals.Config = JsonConvert.DeserializeObject<GlobalConfig>(File.ReadAllText(globalConfigFile));

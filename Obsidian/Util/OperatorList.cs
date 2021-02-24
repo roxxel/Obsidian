@@ -32,9 +32,12 @@ namespace Obsidian.Util
             }
             else
             {
-                using var sw = fi.CreateText();
+                Directory.CreateDirectory(fi.DirectoryName);
+                using (var sw = fi.CreateText())
+                {
+                    await sw.WriteAsync(JsonConvert.SerializeObject(this.ops, Formatting.Indented));
+                }
 
-                await sw.WriteAsync(JsonConvert.SerializeObject(this.ops, Formatting.Indented));
             }
         }
 
