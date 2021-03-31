@@ -29,6 +29,8 @@
     <None Include="Scripts\Deploy-FabricApplication.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ApplicationPackageRoot\RabbitMQPkg\Config\Settings.xml" />
+    <Content Include="ApplicationPackageRoot\RabbitMQPkg\ServiceManifest.xml" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

@@ -19,9 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Obsidian.Generators", "Obsi
 EndProject
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Obsidian.Cloud", "Obsidian.Cloud\Obsidian.Cloud.sfproj", "{9B19E0FF-BFE3-463A-B872-9D04278639DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obsidian.Cloud.ClientService", "Obsidian.Cloud.ClientService\Obsidian.Cloud.ClientService.csproj", "{FFF983DA-0220-4E7B-98E0-819C3E81ED51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Obsidian.Cloud.ClientService", "Obsidian.Cloud.ClientService\Obsidian.Cloud.ClientService.csproj", "{FFF983DA-0220-4E7B-98E0-819C3E81ED51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obsidian.Cloud.Server", "Obsidian.Cloud.Server\Obsidian.Cloud.Server.csproj", "{5E04AC02-25E7-489F-A91F-B41C1941FF96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Obsidian.Cloud.Server", "Obsidian.Cloud.Server\Obsidian.Cloud.Server.csproj", "{5E04AC02-25E7-489F-A91F-B41C1941FF96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

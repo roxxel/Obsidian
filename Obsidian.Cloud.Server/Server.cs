@@ -8,6 +8,8 @@ using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
+using Azure.Messaging.ServiceBus;
+
 namespace Obsidian.Cloud.Server
 {
     /// <summary>
@@ -43,26 +45,35 @@ namespace Obsidian.Cloud.Server
 
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
 
-            while (true)
+            string sbConnStr = "sb://winserver/ServiceBusDefaultNamespace";
+            string queueName = "Obsidian";
+
+            await using (ServiceBusClient sbc = new ServiceBusClient(sbConnStr))
             {
-                cancellationToken.ThrowIfCancellationRequested();
 
-                using (var tx = this.StateManager.CreateTransaction())
-                {
-                    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
-
-                    ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
-                        result.HasValue ? result.Value.ToString() : "Value does not exist.");
-
-                    await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
-
-                    // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
-                    // discarded, and nothing is saved to the secondary replicas.
-                    await tx.CommitAsync();
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
+
+                while (true)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    using (var tx = this.StateManager.CreateTransaction())
+                    {
+                        var result = await myDictionary.TryGetValueAsync(tx, "Counter");
+
+                        //ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
+                        //    result.HasValue ? result.Value.ToString() : "Value does not exist.");
+
+                        await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
+
+                        // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
+                        // discarded, and nothing is saved to the secondary replicas.
+                        await tx.CommitAsync();
+                    }
+
+
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                }
         }
     }
 }
