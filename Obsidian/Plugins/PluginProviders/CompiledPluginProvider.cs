@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Obsidian.API.Plugins;
+using Obsidian.Utilities;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,10 +19,10 @@ namespace Obsidian.Plugins.PluginProviders
             return HandlePlugin(loadContext, assembly, path, logger);
         }
 
-        internal PluginContainer HandlePlugin(PluginLoadContext loadContext, Assembly assembly, string path, ILogger logger)
+        internal PluginContainer HandlePlugin(PluginLoadContext loadContext, Assembly assembly, 
+            string path, ILogger logger)
         {
-            Type pluginType = assembly.GetTypes().FirstOrDefault(type => type.IsSubclassOf(typeof(PluginBase)));
-
+            Type pluginType = assembly.GetLoadableTypes().FirstOrDefault(type => type.IsSubclassOf(typeof(PluginBase)));
             PluginBase plugin;
             if (pluginType == null || pluginType.GetConstructor(Array.Empty<Type>()) == null)
             {

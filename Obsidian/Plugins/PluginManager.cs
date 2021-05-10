@@ -9,7 +9,10 @@ using Obsidian.Utilities;
 using Obsidian.Utilities.Registry;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Obsidian.Plugins
@@ -39,12 +42,14 @@ namespace Obsidian.Plugins
         private readonly List<PluginContainer> stagedPlugins = new();
         internal readonly ServiceProvider serviceProvider = ServiceProvider.Create();
         private readonly object eventSource;
+        private List<Assembly> LoadedNugetPackages { get; } = new();
         private readonly IServer server;
         private readonly List<EventContainer> events = new();
         internal readonly ILogger logger;
         private readonly CommandHandler commands;
 
         private const string loadEvent = "OnLoad";
+        private readonly string depsFolder = Path.Combine(Environment.CurrentDirectory, $"dependencies");
 
         public PluginManager(CommandHandler commands) : this(null, null, null, commands)
         {
@@ -79,6 +84,27 @@ namespace Obsidian.Plugins
 
             if (eventSource != null)
                 GetEvents(eventSource);
+
+            PreloadDependencies(logger);
+        }
+
+        private void PreloadDependencies(ILogger logger)
+        {
+            if (!Directory.Exists(depsFolder))
+                return;
+
+            foreach (var depPath in Directory.GetFiles(depsFolder, "*.dll", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    var asm = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, depPath));
+                    LoadedNugetPackages.Add(asm);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError($"Failed preloading dependency {Path.GetFileNameWithoutExtension(depPath)}", e);
+                }
+            }
         }
 
         /// <summary>
@@ -107,7 +133,6 @@ namespace Obsidian.Plugins
             }
 
             PluginContainer plugin = provider.GetPlugin(path, logger);
-
             return HandlePlugin(plugin, permissions);
         }
 
@@ -144,10 +169,10 @@ namespace Obsidian.Plugins
             if (plugin?.Plugin == null)
             {
                 return plugin;
-            }
+            } 
 
+            plugin.LoadNugetDependencies(LoadedNugetPackages, logger).Wait();
             serviceProvider.InjectServices(plugin, logger);
-
             plugin.RegisterDependencies(this, logger);
 
             plugin.Permissions = permissions;
@@ -405,7 +430,7 @@ namespace Obsidian.Plugins
     }
 }
 
-// thank you Roxxel && DorrianD3V for the invasion <3
+// thank you Roxxel for the invasion <3
 // thank you Jonpro03 for your awesome contributions
 // thank you Sebastian for your amazing plugin framework <3
 // thank you Tides, Craftplacer for being part of the team early on <3

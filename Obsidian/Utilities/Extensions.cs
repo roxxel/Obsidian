@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Security.Cryptography;
 
 #nullable enable
@@ -14,6 +15,18 @@ namespace Obsidian.Utilities
 {
     public static partial class Extensions
     {
+        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
+        }
+
         public static bool IsAir(this ItemStack? item) => item == null || item.Type == Material.Air;
 
         /// <summary>

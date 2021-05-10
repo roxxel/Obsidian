@@ -6,6 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using NuGet.Packaging;
+using System.Diagnostics;
+using Obsidian.Utilities;
 
 namespace Obsidian.Plugins
 {
@@ -35,6 +44,8 @@ namespace Obsidian.Plugins
 
         private Type pluginType;
 
+        private readonly string depsFolder = Path.Combine(Environment.CurrentDirectory, $"dependencies");
+
         public PluginContainer(PluginInfo info, string source)
         {
             Info = info;
@@ -42,7 +53,8 @@ namespace Obsidian.Plugins
             NeedsPermissions = PluginPermissions.None;
         }
 
-        public PluginContainer(PluginBase plugin, PluginInfo info, Assembly assembly, AssemblyLoadContext loadContext, string source)
+        public PluginContainer(PluginBase plugin, PluginInfo info, Assembly assembly,
+            AssemblyLoadContext loadContext, string source)
         {
             Plugin = plugin;
             Info = info;
@@ -50,7 +62,6 @@ namespace Obsidian.Plugins
             Source = source;
 
             NeedsPermissions = AssemblySafetyManager.GetNeededPermissions(assembly);
-
             pluginType = plugin.GetType();
             ClassName = pluginType.Name;
 
@@ -71,6 +82,83 @@ namespace Obsidian.Plugins
         #endregion
 
         #region Dependencies
+        public async Task LoadNugetDependencies(List<Assembly> loadedNugetPackages, ILogger logger)
+        {
+            var assemblies = this.pluginType.Assembly.GetReferencedAssemblies();
+
+            if (!Directory.Exists(depsFolder))
+                Directory.CreateDirectory(depsFolder);
+
+            foreach (var asm in assemblies)
+            {
+                if (asm.Name.StartsWith("Obsidian") || asm.Name.StartsWith("System"))
+                    continue;
+                if (loadedNugetPackages.Any(x => x.GetName().Version == asm.Version && asm.Name == x.GetName().Name))
+                {
+                    logger.LogDebug($"Requirement {asm.Name} v{asm.Version} already satisfied. Skipping");
+                    LoadContext.LoadFromAssemblyPath(
+                        loadedNugetPackages.FirstOrDefault(
+                            x => x.GetName().Version == asm.Version && asm.Name == x.GetName().Name).Location);
+                    continue;
+                }
+
+
+                await LoadDependency(loadedNugetPackages, asm, logger);
+            }
+            if (Directory.Exists(Path.Combine(depsFolder, "lib")))
+                Directory.Delete(Path.Combine(depsFolder, "lib"), true);
+        }
+
+        //returns true if dependency was successfully downloaded; otherwise false
+        private async Task<bool> LoadDependency(List<Assembly> loadedNugetPackages, AssemblyName asm, ILogger logger)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var cache = new SourceCacheContext();
+            var repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+            var resource = await repository.GetResourceAsync<DownloadResource>();
+
+            string packageId = asm.Name;
+            var packageVersion = new NuGetVersion(asm.Version);
+            var dlRes = await NugetUtils.GetDownloadResourceResult(
+                depsFolder, cache, repository, resource, packageId, packageVersion);
+
+            if (dlRes.PackageReader == null)
+            {
+                logger.LogError($"No matching package found for {asm.Name} {asm.Version}");
+                return false;
+            }
+
+            var packageReader = dlRes.PackageReader;
+            var files = NugetUtils.GetMatchingFiles(packageReader);
+
+            if (files.Count == 0)
+                return false;
+
+            NugetUtils.CopyFiles(packageReader, depsFolder, files);
+
+            dlRes.Dispose();
+
+            //remove folder with .nupkg and other stuff that we don't need
+            Directory.Delete(Path.Combine(depsFolder, packageId.ToLower()), true);
+
+            var path = Path.Combine(depsFolder, files[0]);
+            var fileName = $"{Path.GetFileNameWithoutExtension(files[0])}_{packageVersion.Version}.dll"; //depName_0.0.0.dll
+            File.Move(path, Path.Combine(depsFolder, fileName)); //renaming file to avoid conflicts
+
+            var a = LoadContext.LoadFromAssemblyPath(Path.Combine(depsFolder, fileName)); //loading package into plugin
+
+            lock (loadedNugetPackages)
+            {
+                loadedNugetPackages.Add(a);
+            }
+            logger.LogDebug($"Downloaded package {packageId} {packageVersion} in {sw.Elapsed}");
+            sw.Stop();
+            return true;
+
+        }
+
         public void RegisterDependencies(PluginManager manager, ILogger logger = null)
         {
             // FieldInfo[] and PropertyInfo[] can't be merged into MemberInfo[], since it includes methods etc. and MemberInfo doesn't have SetValue method
@@ -190,7 +278,6 @@ namespace Obsidian.Plugins
                 return wrapper;
             }
         }
-
         private static PluginContainer GetDependency(PluginManager manager, ILogger logger, string name, Version minVersion)
         {
             foreach (var plugin in manager.Plugins)
