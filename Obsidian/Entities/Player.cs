@@ -111,6 +111,7 @@ namespace Obsidian.Entities
         internal override async Task UpdateAsync(Server server, VectorF position, bool onGround)
         {
             await base.UpdateAsync(server, position, onGround);
+            UpdateTracker();
 
             this.HeadY = position.Y + 1.62f;
 
@@ -122,6 +123,7 @@ namespace Obsidian.Entities
         internal override async Task UpdateAsync(Server server, VectorF position, Angle yaw, Angle pitch, bool onGround)
         {
             await base.UpdateAsync(server, position, yaw, pitch, onGround);
+            UpdateTracker();
 
             this.HeadY = position.Y + 1.62f;
 
@@ -133,6 +135,7 @@ namespace Obsidian.Entities
         internal override async Task UpdateAsync(Server server, Angle yaw, Angle pitch, bool onGround)
         {
             await base.UpdateAsync(server, yaw, pitch, onGround);
+            UpdateTracker();
 
             await this.PickupNearbyItemsAsync(server, 2);
         }
@@ -548,6 +551,44 @@ namespace Obsidian.Entities
                 if (!await HasPermission(perm)) return false;
             }
             return true;
+        }
+
+        public VectorF GetLookDirection()
+        {
+            const float DegreesToRadian = 1 / 255f * 360f / 180f * MathF.PI;
+            float pitch = Pitch.Value * DegreesToRadian;
+            float yaw = Yaw.Value * DegreesToRadian;
+
+            float cosPitch = MathF.Cos(pitch);
+            return new(-cosPitch * MathF.Sin(yaw), -MathF.Sin(pitch), cosPitch * MathF.Cos(yaw));
+        }
+
+        private SpawnEntity tracker;
+        public void SpawnTracker()
+        {
+            tracker = new SpawnEntity
+            {
+                EntityId = EntityId + World.TotalLoadedEntities() + 300,
+                Uuid = Guid.NewGuid(),
+                Type = EntityType.WitherSkull,
+                Position = VectorF.Zero,
+                Pitch = 0f,
+                Yaw = 0f,
+                Data = 0,
+                Velocity = Velocity.FromPosition(Vector.Zero)
+            };
+            client.SendPacket(tracker);
+        }
+        public void UpdateTracker()
+        {
+            client.SendPacket(new EntityTeleport
+            {
+                EntityId = tracker.EntityId,
+                Position = Position + new VectorF(0f, 1.62f, 0f) + GetLookDirection().Normalize(),
+                Yaw = 0f,
+                Pitch = 0f,
+                OnGround = false
+            });
         }
     }
 }

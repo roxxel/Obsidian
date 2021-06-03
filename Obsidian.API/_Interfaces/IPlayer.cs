@@ -40,6 +40,7 @@ namespace Obsidian.API
         public float FoodExhastionLevel { get; set; }
         public float FoodSaturationLevel { get; set; }
 
+        public VectorF GetLookDirection();
         public Task TeleportAsync(VectorF position);
         public Task TeleportAsync(IPlayer to);
         public Task SendMessageAsync(IChatMessage message, MessageType type = MessageType.Chat, Guid? sender = null);

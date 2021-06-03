@@ -404,6 +404,8 @@ namespace Obsidian
             });
             // TODO fix its sending chunks too fast
             //await Server.world.ResendBaseChunksAsync(4, 0, 0, 0, 0, this);
+
+            Player.SpawnTracker();
         }
 
         #region Packet sending
