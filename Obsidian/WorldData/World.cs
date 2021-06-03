@@ -501,5 +501,90 @@ namespace Obsidian.WorldData
             if (uuid == Guid.Empty) uuid = Guid.NewGuid();
             await this.Server.BroadcastPacketAsync(new SpawnPainting(uuid, painting.Id, position, direction));
         }
+
+        public List<VectorF> Traverse(VectorF startPosition, VectorF endPosition)
+        {
+            float x1 = startPosition.X, y1 = startPosition.Y, z1 = startPosition.Z; 
+            float x2 = endPosition.X, y2 = endPosition.Y, z2 = endPosition.Z; 
+
+            return Calculate(x1, y1, z1, x2, y2, z2);
+        }
+
+        public List<VectorF> Traverse(VectorF startPosition, VectorF lookDirection, int length = 8)
+        {
+            float x1 = startPosition.X, 
+                y1 = startPosition.Y, 
+                z1 = startPosition.Z;   
+
+            float x2 = startPosition.X + (lookDirection.X * length),
+                y2 = startPosition.Y + (lookDirection.Y * length),
+                z2 = startPosition.Z + (lookDirection.Z * length); 
+
+            return Calculate(x1, y1, z1, x2, y2, z2);
+        }
+
+        private List<VectorF> Calculate(float x1, float y1, float z1, float x2, float y2, float z2)
+        {
+            float Frac0(float x)
+            {
+                return x - MathF.Floor(x);
+            }
+            float Frac1(float x)
+            {
+                return 1 - x + MathF.Floor(x);
+            }
+
+            List<VectorF> blocks = new List<VectorF>();
+
+            float tMaxX, tMaxY, tMaxZ, tDeltaX, tDeltaY, tDeltaZ;
+            VectorF voxel = new VectorF();
+            var dx = Math.Sign(x2 - x1); // x direction
+            if (dx != 0) tDeltaX = Math.Min(dx / (x2 - x1), float.PositiveInfinity); else tDeltaX = float.PositiveInfinity;
+            if (dx > 0) tMaxX = tDeltaX * Frac1(x1); else tMaxX = tDeltaX * Frac0(x1);
+            voxel.X = x1;
+
+            var dy = Math.Sign(y2 - y1); // y direction
+            if (dy != 0) tDeltaY = Math.Min(dy / (y2 - y1), float.PositiveInfinity); else tDeltaY = float.PositiveInfinity;
+            if (dy > 0) tMaxY = tDeltaY * Frac1(y1); else tMaxY = tDeltaY * Frac0(y1);
+            voxel.Y = y1;
+
+            var dz = Math.Sign(z2 - z1); // z direction
+            if (dz != 0) tDeltaZ = Math.Min(dz / (z2 - z1), float.PositiveInfinity); else tDeltaZ = float.PositiveInfinity;
+            if (dz > 0) tMaxZ = tDeltaZ * Frac1(z1); else tMaxZ = tDeltaZ * Frac0(z1);
+            voxel.Z = z1;
+
+            while (true)
+            {
+                if (tMaxX < tMaxY)
+                {
+                    if (tMaxX < tMaxZ)
+                    {
+                        voxel.X += dx;
+                        tMaxX += tDeltaX;
+                    }
+                    else
+                    {
+                        voxel.Z += dz;
+                        tMaxZ += tDeltaZ;
+                    }
+                }
+                else
+                {
+                    if (tMaxY < tMaxZ)
+                    {
+                        voxel.Y += dy;
+                        tMaxY += tDeltaY;
+                    }
+                    else
+                    {
+                        voxel.Z += dz;
+                        tMaxZ += tDeltaZ;
+                    }
+                }
+                if (tMaxX > 1 && tMaxY > 1 && tMaxZ > 1) break;
+                blocks.Add(voxel);
+            }
+            return blocks;
+        }
     }
 }
